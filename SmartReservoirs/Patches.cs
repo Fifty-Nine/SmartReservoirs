@@ -8,10 +8,13 @@ namespace SmartReservoirs
     {
         private static void Prefix()
         {
-            Debug.Log("=== GeneratedBuildings.LoadGeneratedBuildings Prefix === " + LiquidReservoirSmartConfig.ID + " " + LiquidReservoirSmartConfig.PrefabID);
+            Debug.Log("=== SmartReservoirs GeneratedBuildings.LoadGeneratedBuildings Prefix === ");
 
             LiquidReservoirSmartConfig.addStrings();
             ModUtil.AddBuildingToPlanScreen("Plumbing", LiquidReservoirSmartConfig.ID);
+
+            GasReservoirSmartConfig.addStrings();
+            ModUtil.AddBuildingToPlanScreen("HVAC", GasReservoirSmartConfig.ID);
         }
     }
 
@@ -20,8 +23,9 @@ namespace SmartReservoirs
     {
         private static void Prefix()
         {
-            Debug.Log("=== Db.Initialize Prefix === " + LiquidReservoirSmartConfig.ID + " ");
-            Database.Techs.TECH_GROUPING["ImprovedLiquidPiping"].AddToArray(LiquidReservoirSmartConfig.ID);
+            Debug.Log("=== SmartReservoirs Db.Initialize Prefix === ");
+            Database.Techs.TECH_GROUPING["LiquidTemperature"].AddToArray(LiquidReservoirSmartConfig.ID);
+            Database.Techs.TECH_GROUPING["HVAC"].AddToArray(GasReservoirSmartConfig.ID);
         }
     }
 }

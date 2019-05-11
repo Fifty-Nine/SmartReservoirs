@@ -49,6 +49,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GasReservoirSmartConfig.cs" />
     <Compile Include="LiquidReservoirSmartConfig.cs" />
     <Compile Include="ModInfo.cs" />
     <Compile Include="Patches.cs" />

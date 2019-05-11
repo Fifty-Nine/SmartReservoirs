@@ -4,9 +4,9 @@ using UnityEngine;
 namespace SmartReservoirs
 {
     [KSerialization.SerializationConfig(KSerialization.MemberSerialization.OptIn)]
-    public class LiquidReservoirSmartConfig : IBuildingConfig
+    public class GasReservoirSmartConfig : IBuildingConfig
     {
-        public const string ID = "LiquidReservoirSmart";
+        public const string ID = "GasReservoirSmart";
         public static string PrefabID {
             get {
                 return ID.ToUpper();
@@ -14,7 +14,7 @@ namespace SmartReservoirs
         }
 
         internal static class SLRStrings {
-            internal const string Name = "Smart Liquid Reservoir";
+            internal const string Name = "Smart Gas Reservoir";
             internal const string Desc = "FIXME Desc.";
             internal const string Effect = " FIXME Effect";
             internal const string OutputPort = "FIXME Output Port";
@@ -31,8 +31,29 @@ namespace SmartReservoirs
             Strings.Add(prefabFmt + ".EFFECT", SLRStrings.Effect);
         }
 
-        private static readonly LogicPorts.Port[] INPUT_PORTS = { LogicOperationalController.INPUT_PORTS_0_1[0] };
-        private static readonly LogicPorts.Port[] OUTPUT_PORTS = { LogicPorts.Port.OutputPort("FULL", new CellOffset(1, 1), SLRStrings.OutputPort, SLRStrings.OutputPortActive, SLRStrings.OutputPortInactive) };
+        private static LogicPorts.Port makeInputPort()
+        {
+            return LogicPorts.Port.InputPort(
+                LogicOperationalController.PORT_ID,
+                cell_offset: new CellOffset(-2, 1),
+                description: STRINGS.UI.LOGIC_PORTS.CONTROL_OPERATIONAL,
+                activeDescription: STRINGS.UI.LOGIC_PORTS.CONTROL_OPERATIONAL_ACTIVE,
+                inactiveDescription: STRINGS.UI.LOGIC_PORTS.CONTROL_OPERATIONAL_INACTIVE
+            );
+        }
+        private static LogicPorts.Port makeOutputPort()
+        {
+            return LogicPorts.Port.OutputPort(
+                "FULL",
+                new CellOffset(2, 1),
+                description: SLRStrings.OutputPort,
+                activeDescription: SLRStrings.OutputPortActive,
+                inactiveDescription: SLRStrings.OutputPortInactive
+            );
+        }
+
+        private static readonly LogicPorts.Port[] INPUT_PORTS = { makeInputPort() };
+        private static readonly LogicPorts.Port[] OUTPUT_PORTS = { makeOutputPort() };
 
         public override BuildingDef CreateBuildingDef()
         {
@@ -47,8 +68,8 @@ namespace SmartReservoirs
             };
             BuildingDef bd = BuildingTemplates.CreateBuildingDef(
                 ID,
-                width: 2, height: 3,
-                anim: "liquidreservoir_kanim",
+                width: 5, height: 3,
+                anim: "gasstorage_kanim",
                 hitpoints: 100,
                 BUILDINGS.CONSTRUCTION_TIME_SECONDS.TIER5,
                 materialCosts, materials,
@@ -57,10 +78,10 @@ namespace SmartReservoirs
                 BUILDINGS.DECOR.PENALTY.TIER1,
                 NOISE_POLLUTION.NOISY.TIER1
             );
-            bd.InputConduitType = ConduitType.Liquid;
-            bd.OutputConduitType = ConduitType.Liquid;
+            bd.InputConduitType = ConduitType.Gas;
+            bd.OutputConduitType = ConduitType.Gas;
             bd.Floodable = false;
-            bd.ViewMode = OverlayModes.LiquidConduits.ID;
+            bd.ViewMode = OverlayModes.GasConduits.ID;
             bd.AudioCategory = AUDIO.HOLLOW_METAL;
             bd.UtilityInputOffset = new CellOffset(1, 2);
             bd.UtilityOutputOffset = new CellOffset(0, 0);
@@ -74,25 +95,25 @@ namespace SmartReservoirs
 
         public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
         {
-            Debug.Log("=== LiquidReservoirSmart.ConfigureBuildingTemplate ===");
+            Debug.Log("=== GasReservoirSmart.ConfigureBuildingTemplate ===");
             Storage storage = BuildingTemplates.CreateDefaultStorage(go);
             storage.showDescriptor = true;
             storage.allowItemRemoval = false;
-            storage.storageFilters = STORAGEFILTERS.LIQUIDS;
-            storage.capacityKg = 3000.0f;
+            storage.storageFilters = STORAGEFILTERS.GASES;
+            storage.capacityKg = 90.0f;
             storage.SetDefaultStoredItemModifiers(GasReservoirConfig.ReservoirStoredItemModifiers);
 
             go.AddOrGet<ReservoirSmart>();
 
             ConduitConsumer cc = go.AddOrGet<ConduitConsumer>();
-            cc.conduitType = ConduitType.Liquid;
+            cc.conduitType = ConduitType.Gas;
             cc.ignoreMinMassCheck = true;
             cc.forceAlwaysSatisfied = true;
             cc.alwaysConsume = true;
             cc.capacityKG = storage.capacityKg;
 
             ConduitDispenser cd = go.AddOrGet<ConduitDispenser>();
-            cd.conduitType = ConduitType.Liquid;
+            cd.conduitType = ConduitType.Gas;
             cd.elementFilter = null;
         }
 
