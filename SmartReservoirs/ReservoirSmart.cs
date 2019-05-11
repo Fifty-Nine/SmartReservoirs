@@ -47,6 +47,13 @@ public class ReservoirSmart : KMonoBehaviour, IUserControlledCapacity
 
     }
 
+    protected override void OnCleanUp()
+    {
+        Unsubscribe((int)GameHashes.OnStorageChange, UpdateLogicStateDelegate);
+        Unsubscribe((int)GameHashes.OperationalChanged, UpdateLogicStateDelegate);
+        base.OnCleanUp();
+    }
+
     /*
      * For some reason, using a delegate or lambda for this causes a cryptic assertion in the output log, and I have no idea why.
      * For the time being, defining this as a method works around the issue.
