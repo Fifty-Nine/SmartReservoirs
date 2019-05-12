@@ -2,12 +2,15 @@
 using KSerialization;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class ReservoirSmart : KMonoBehaviour, IUserControlledCapacity
+public class ReservoirSmart : KMonoBehaviour, IUserControlledCapacity, ISim1000ms
 {
     private MeterController meter;
 
     [MyCmpGet]
     private LogicPorts ports = null;
+
+    [MyCmpGet]
+    private Operational operational = null;
 
     [MyCmpGet]
     private Storage storage = null;
@@ -40,11 +43,9 @@ public class ReservoirSmart : KMonoBehaviour, IUserControlledCapacity
         animCtrl.TintColour = new Color32(130, 255, 165, 255);
 
         meter = new MeterController(animCtrl, "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, "meter_fill", "meter_OL");
-        Debug.Log("ReservoirSmart.OnSpawn subscribe");
         Subscribe((int)GameHashes.OnStorageChange, UpdateLogicStateDelegate);
         Subscribe((int)GameHashes.OperationalChanged, UpdateLogicStateDelegate);
         UpdateLogicState();
-
     }
 
     protected override void OnCleanUp()
@@ -62,15 +63,42 @@ public class ReservoirSmart : KMonoBehaviour, IUserControlledCapacity
     {
         sr.UpdateLogicState();
     }
-
     private static readonly EventSystem.IntraObjectHandler<ReservoirSmart> UpdateLogicStateDelegate = new EventSystem.IntraObjectHandler<ReservoirSmart>(UpdateLogicStateAction);
+
+    /*
+     * Get the current output signal state.
+     */
+    private int SignalState()
+    {
+        var stored = storage.MassStored();
+        return (stored != 0.0f && stored >= UserMaxCapacity) ? 1 : 0;
+    }
+
+    /*
+     * Determine what the the current operational.IsActive state should be according to the
+     * circumstances.
+     */
+    private bool ActiveState()
+    {
+        return operational.IsOperational && storage.MassStored() > 0.0f &&
+            (!ports.IsPortConnected(LogicOperationalController.PORT_ID) || ports.GetInputValue(LogicOperationalController.PORT_ID) == 1);
+    }
 
     private void UpdateLogicState()
     {
         var pos = Mathf.Clamp01(storage.MassStored() / storage.capacityKg);
         meter.SetPositionPercent(pos);
-        ports.SendSignal("FULL", storage.MassStored() >= UserMaxCapacity ? 1 : 0);
+        ports.SendSignal("FULL", SignalState());
+    }
+
+    float elapsedTime = 0.0f;
+    public void Sim1000ms(float dt)
+    {
+        elapsedTime += dt;
+        if (elapsedTime >= 1.0f)
+        {
+            operational.SetActive(ActiveState());
+            elapsedTime = 0.0f;
+        }
     }
 };
-
-

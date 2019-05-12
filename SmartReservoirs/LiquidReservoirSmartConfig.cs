@@ -67,7 +67,7 @@ namespace SmartReservoirs
             bd.PermittedRotations = PermittedRotations.FlipH;
 
             bd.RequiresPowerInput = true;
-            bd.EnergyConsumptionWhenActive = 10.0f;
+            bd.EnergyConsumptionWhenActive = 30.0f;
             bd.PowerInputOffset = new CellOffset(1, 0);
             return bd;
         }
